@@ -1,15 +1,13 @@
 const Portfolio = require('../models/Portfolio');
-const secretKey = 'sohan-khedekar'; // Replace with your actual secret key
-const passport = require('passport');
 const User = require('../models/User')
-
+const  mongoose  = require('mongoose')
 exports.getUserPortfolio = async (req, res) => {
   try {
-    const user = req.user;
-    console.log(req.user);
-    // Use .populate() to fetch the associated user details
-    const portfolio = await Portfolio.findOne({ user: user._id }).populate('User');
-    console.log(portfolio);
+    const userId = req.params.userId; // Assuming the user ID is in the route parameters
+
+    // Find the portfolio based on the userId field
+    const portfolio = await Portfolio.findOne({ user: userId });
+
     if (!portfolio) {
       return res.status(404).json({ message: 'Portfolio not found' });
     }
@@ -19,11 +17,18 @@ exports.getUserPortfolio = async (req, res) => {
     console.error('Error getting portfolio:', error);
     res.status(500).json({ message: 'Server error' });
   }
-}
-
+};
 exports.createPortfolio = async (req, res) => {
   try {
-    const user = req.user;
+    const userId = req.params.userId; // Assuming the user ID is in the route parameters
+
+    // Check if the user exists
+    const user = await User.findById(userId);
+
+    if (!mongoose.Types.ObjectId.isValid(userId)){
+      return false;
+  }
+
     const { name } = req.body;
 
     // Check if the user already has a portfolio
@@ -44,14 +49,14 @@ exports.createPortfolio = async (req, res) => {
     console.error('Error creating portfolio:', error);
     res.status(500).json({ message: 'Server error' });
   }
-}
+};
 
 exports.addPortfolioEntry = async (req, res) => {
   try {
-    const user = req.user;
+    const userId = req.params.userId; // Assuming the user ID is in the route parameters
     const { symbol } = req.body;
 
-    const portfolio = await Portfolio.findOne({ user: user._id });
+    const portfolio = await Portfolio.findOne({ user: userId });
 
     if (!portfolio) {
       return res.status(404).json({ message: 'Portfolio not found' });
@@ -69,15 +74,15 @@ exports.addPortfolioEntry = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
-}
+};
 
 exports.updatePortfolioEntry = async (req, res) => {
   try {
-    const user = req.user;
+    const userId = req.params.userId; // Assuming the user ID is in the route parameters
     const entryId = req.params.entryId;
     const { symbol } = req.body;
 
-    const portfolio = await Portfolio.findOne({ user: user._id });
+    const portfolio = await Portfolio.findOne({ user: userId });
 
     if (!portfolio) {
       return res.status(404).json({ message: 'Portfolio not found' });
@@ -96,14 +101,14 @@ exports.updatePortfolioEntry = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
-}
+};
 
 exports.deletePortfolioEntry = async (req, res) => {
   try {
-    const user = req.user;
+    const userId = req.params.userId; // Assuming the user ID is in the route parameters
     const entryId = req.params.entryId;
 
-    const portfolio = await Portfolio.findOne({ user: user._id });
+    const portfolio = await Portfolio.findOne({ user: userId });
 
     if (!portfolio) {
       return res.status(404).json({ message: 'Portfolio not found' });
@@ -116,4 +121,4 @@ exports.deletePortfolioEntry = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
-}
+};

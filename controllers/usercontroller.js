@@ -1,74 +1,94 @@
-const User = require('../models/User'); // Import the User model
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt'); // For hashing passwords
 
-// Define your secret key here
-const secretKey = 'sohan-khedekar';
+const {loginService} = require('../services/auth/login/loginService')
+const {registerService}= require('../services/auth/register/register')
+const{logoutService} = require('../services/auth/logout/logout')
+const{profileService} = require('../services/auth/profile/profile')
 
-// Register a new user
 exports.register = async (req, res, next) => {
+
   try {
-    const { username, email, password } = req.body;
+    const data = await registerService (req.body) 
+   
+    return res.json(data)
 
-    // Check if the user already exists
-    const existingUser = await User.findOne({ email });
-
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
-
-    // Hash the password before storing it in the database
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create a new user
-    const newUser = new User({
-      username,
-      email,
-      password: hashedPassword,
-    });
-
-    // Save the user to the database
-    await newUser.save();
-
-    // Create a JWT token for the new user
-    const token = jwt.sign({ userId: newUser._id }, secretKey, {
-      expiresIn: '1h', // Token expires in 1 hour (adjust as needed)
-    });
-
-    // Respond with the token and user data
-    res.status(201).json({ token, user: { _id: newUser._id, username: newUser.username } });
   } catch (error) {
-    next(error);
+    console.log(error);
+    if (error.status && error.error) {
+      res.status(error.status).send(error.error);
+      return next(error);
+    }
+    if (error.status) {
+      res.sendStatus(error.status);
+      return next(error);
+    }
+    res.status(500).json({ status: false, message: "Internal Server Error" });
+    return next(error);
   }
 };
 
 // User login
-exports.login = async (req, res, next) => {
+exports.login = async (req, res , next) => {
   try {
-    const { email, password } = req.body;
-
-    // Find the user by email
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(401).json({ message: 'Authentication failed' });
+    const data = await loginService(req.body);
+    if(data.success){
+      return res.json({success : true , token : data.token , message: data.message});
+    }
+    else{
+      return res.status(401).json({success : false , message: data.message })
     }
 
-    // Compare the entered password with the stored, hashed password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
-      return res.status(401).json({ message: 'Authentication failed' });
-    }
-
-    // Create a JWT token for the user
-    const token = jwt.sign({ userId: user._id }, secretKey, {
-      expiresIn: '1h', // Token expires in 1 hour (adjust as needed)
-    });
-
-    // Respond with the token and user data
-    res.status(200).json({ token, user: { _id: user._id, username: user.username } });
   } catch (error) {
-    next(error);
+    console.log(error);
+    if (error.status && error.error) {
+      res.status(error.status).send(error.error);
+      return next(error);
+    }
+    if (error.status) {
+      res.sendStatus(error.status);
+      return next(error);
+    }
+    res.status(500).json({ status: false, message: "Internal Server Error" });
+    return next(error);
   }
 };
+exports.logout = async (req , res , next) => {
+  try {
+     const data = await logoutService(req.body, req.headers);
+
+      return res.json(data)
+      
+  } catch (error) {
+      console.log(error);
+  if (error.status && error.error) {
+    res.status(error.status).send(error.error);
+    return next(error);
+  }
+  if (error.status) {
+    res.sendStatus(error.status);
+    return next(error);
+  }
+  res.status(500).json({ status: false, message: "Internal Server Error" });
+  return next(error);
+      
+  }
+
+};
+exports.profile = async (req , res , next) => {
+  try {
+      const data = await profileService(req.userId)
+      return res.json(data)
+
+  } catch (error) {
+      console.error(error);
+      if (error.status && error.error) {
+        res.status(error.status).send(error.error);
+        return next(error);
+      }
+      if (error.status) {
+        res.sendStatus(error.status);
+        return next(error);
+      }
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+      return next(error);
+    }
+  };

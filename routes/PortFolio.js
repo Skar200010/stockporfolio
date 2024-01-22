@@ -1,28 +1,27 @@
-// routes/portfolio.js
-//const passport = require('passport');
 const express = require('express');
 const router = express.Router();
 const portfoliocontroller = require('../controllers/portfoliocontroller');
-//const {createportfolioValidation} = require('../middlewares/portfoliomiddleware')
+const stockController = require('../controllers/stockcontroller');
 
-// Protect these routes with authentication middleware
-//router.use(passport.authenticate('jwt', { session: false }));
+
 
    
 // Get user's portfolio
-router.get('/user-portfolio', portfoliocontroller.getUserPortfolio);
-//router.get('/user-portfolio', passport.authenticate('jwt', { session: false }), portfolioController.getUserPortfolio);
+router.get('/user-portfolio/:userId', portfoliocontroller.getUserPortfolio);
 
 // Create a new portfolio
-router.post('/create-portfolio', portfoliocontroller.createPortfolio);
+router.post('/create-portfolio/:userId', portfoliocontroller.createPortfolio);
 
 // Add a portfolio entry
-router.post('/add-entry', portfoliocontroller.addPortfolioEntry);
+router.post('/user/:userId/portfolio/add-entry', portfoliocontroller.addPortfolioEntry);
 
 // Update a portfolio entry
-router.put('/update-entry/:entryId', portfoliocontroller.updatePortfolioEntry);
+router.put('/user/:userId/portfolio/update-entry/:entryId', portfoliocontroller.updatePortfolioEntry);
 
 // Delete a portfolio entry
-router.delete('/delete-entry/:entryId', portfoliocontroller.deletePortfolioEntry);
+router.delete('/user/:userId/portfolio/delete-entry/:entryId', portfoliocontroller.deletePortfolioEntry);
+
+router.get('/stock/:symbol', stockController.fetchStockData);
+
 
 module.exports = router;

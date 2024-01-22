@@ -13,7 +13,6 @@ const session = require('express-session');
 var indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const portfolioroutes = require('./routes/PortFolio.js')
-const stockroutes = require('./routes/Stock.js')
 var app = express();
 app.use(
   session({
@@ -40,7 +39,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/', indexRouter);
 app.use('/', usersRouter);
 app.use('/', portfolioroutes);
-app.use('/', stockroutes);
 
 // ... (other middleware)
 
