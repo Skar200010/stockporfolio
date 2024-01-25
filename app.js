@@ -4,11 +4,10 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-const passport = require('passport');
 const bodyParser = require('body-parser');
 
 
-
+const cors = require('cors');
 const session = require('express-session');
 var indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -22,8 +21,6 @@ app.use(
     // Add other session options as needed
   })
 );
-app.use(passport.initialize());
-app.use(passport.session());
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -33,6 +30,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 

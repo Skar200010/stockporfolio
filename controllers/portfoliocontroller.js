@@ -1,6 +1,8 @@
 const Portfolio = require('../models/Portfolio');
 const User = require('../models/User')
 const  mongoose  = require('mongoose')
+const { ObjectId } = require('mongoose').Types;
+
 exports.getUserPortfolio = async (req, res) => {
   try {
     const userId = req.params.userId; // Assuming the user ID is in the route parameters
@@ -78,7 +80,7 @@ exports.addPortfolioEntry = async (req, res) => {
 
 exports.updatePortfolioEntry = async (req, res) => {
   try {
-    const userId = req.params.userId; // Assuming the user ID is in the route parameters
+    const userId = req.params.userId; 
     const entryId = req.params.entryId;
     const { symbol } = req.body;
 
@@ -103,22 +105,36 @@ exports.updatePortfolioEntry = async (req, res) => {
   }
 };
 
+// Import necessary modules
+
+// Define the route
 exports.deletePortfolioEntry = async (req, res) => {
   try {
-    const userId = req.params.userId; // Assuming the user ID is in the route parameters
+    const userId = req.params.userId;
     const entryId = req.params.entryId;
 
+    // Find the portfolio based on the user ID
     const portfolio = await Portfolio.findOne({ user: userId });
 
     if (!portfolio) {
       return res.status(404).json({ message: 'Portfolio not found' });
     }
 
-    portfolio.entries.id(entryId).remove();
+    const entry = portfolio.entries.id(entryId);
+
+    if (!entry) {
+      return res.status(404).json({ message: 'Entry not found' });
+    }
+
+    console.log('Current Entries:', portfolio.entries);
+
+    portfolio.entries.remove(entry);
+
     await portfolio.save();
 
     res.status(204).send();
   } catch (error) {
+    console.error('Error deleting portfolio entry:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

@@ -66,7 +66,7 @@ exports.logout = async (req , res , next) => {
   if (error.status) {
     res.sendStatus(error.status);
     return next(error);
-  }
+  }cd 
   res.status(500).json({ status: false, message: "Internal Server Error" });
   return next(error);
       
